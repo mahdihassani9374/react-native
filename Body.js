@@ -1,22 +1,58 @@
 import React, { Component } from 'react'
-import { Text, View , TextInput ,Button} from 'react-native'
+import { Text, View , TextInput ,Button , RefreshControl , ScrollView} from 'react-native'
 
 export default class Body extends Component {
     state = {
-        name : 'مهدی حسنی '
+        name : 'مهدی حسنی ',
+        entries:[],
+        loading:true,
+        refreshing:false
     }
-    message=()=> {
-        alert(`سلام بر ${this.state.name}`)
+
+    _onRefresh=()=>{
+        this.setState({
+            refreshing:true,
+            entries:[]
+        })
+        this.fetchData()
     }
+
+    componentDidMount() {        
+      this.fetchData();
+    }
+
+    fetchData =()=>{
+        this.setState({
+            entries: []
+        })
+        fetch('http://api.ferdows110.ir/api/session?count=9').then((response) => response.json())
+        .then((responseJson) => {           
+            this.setState({
+                entries: responseJson,
+                loading:false,
+                refreshing:false
+            })
+        })
+    }
+    
     render() {
         return (
-            <View style={{backgroundColor:'#fff',flex:10,alignItems:"center",justifyContent:'center',padding:20}}>
-                <Text style={{color:'#7B1FA2',fontFamily:"IRANSansMobile",textAlign:'center',marginTop:15}}>برای ورود به اپلیکیشن باید عضو باشد </Text>
-                <TextInput placeholder="نام کاربری " style={{color:'#fff',fontFamily:"IRANSansMobile",textAlign:'right',width:'100%',marginTop:15}} />
-                <TextInput placeholder="رمز عبور " style={{color:'#fff',fontFamily:"IRANSansMobile",textAlign:'right',width:'100%',marginTop:15}} />
-                <View style={{marginTop:25,width:'100%'}}>
-                    <Button style={{width:'100%',height:30}} title="ورود" color="#E91E63" onPress={this.message} />
-                </View>
+            <View style={{backgroundColor:'#fff',flex:10}}>
+                <ScrollView  refreshControl={
+                <RefreshControl
+                  refreshing={this.state.refreshing}
+                  onRefresh={this._onRefresh}
+                />
+              }>
+                {
+                    this.state.entries.map((item,index)=>
+                        <Text key={index} style={{padding: 10,marginTop: 3,backgroundColor: '#d9f9b1',alignItems: 'center',}}>
+                            {item.occasion.title}
+                        </Text>
+                    )
+                }
+              
+            </ScrollView>
             </View>
         )
     }
