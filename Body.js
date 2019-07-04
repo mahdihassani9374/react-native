@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { Text, View , TextInput ,Button , RefreshControl , ScrollView} from 'react-native'
+import React, { Component  } from 'react'
+import { Text, View , TextInput ,Button , RefreshControl , ScrollView , AsyncStorage} from 'react-native'
 
 export default class Body extends Component {
     state = {
@@ -17,10 +17,20 @@ export default class Body extends Component {
         this.fetchData()
     }
 
-    componentDidMount() {        
-      this.fetchData();
+    componentDidMount() { 
+      AsyncStorage.getItem('session').then((value)=>{
+          if(value==null) {
+            this.fetchData();
+          }
+          else {
+            this.setState({
+                entries: JSON.parse(value)
+            })
+          }
+          console.log('session',value)
+      })  
     }
-
+    
     fetchData =()=>{
         this.setState({
             entries: []
@@ -32,7 +42,8 @@ export default class Body extends Component {
                 loading:false,
                 refreshing:false
             })
-        })
+            AsyncStorage.setItem('session',JSON.stringify(this.state.entries))
+        })        
     }
     
     render() {
